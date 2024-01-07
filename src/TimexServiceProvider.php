@@ -23,26 +23,29 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Buildix\Timex\Commands\TimexCommand;
+use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 
-class TimexServiceProvider extends PluginServiceProvider
-{
+class TimexServiceProvider extends PackageServiceProvider {
+    public static string $name = 'timex';
+
     protected array $scripts = [
-      'timex' => __DIR__.'/../resources/dist/timex.js'
+        'timex' => __DIR__ . '/../resources/dist/timex.js'
     ];
 
     protected array $styles = [
-      'timex' => __DIR__.'/../resources/dist/timex.css'
+        'timex' => __DIR__ . '/../resources/dist/timex.css'
     ];
 
-    public function configurePackage(Package $package): void
-    {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
+    /*
+     * This class is a Package Service Provider
+     *
+     * More info: https://github.com/spatie/laravel-package-tools
+     */
+    public function configurePackage(Package $package): void {
         $package
-            ->name('timex')
+            ->name(static::$name)
             ->hasConfigFile()
             ->hasViews()
             ->hasAssets()
@@ -51,7 +54,7 @@ class TimexServiceProvider extends PluginServiceProvider
             ->hasCommands([
                 MakeAttachmentsTableCommand::class
             ])
-            ->hasInstallCommand(function (InstallCommand $command){
+            ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
                     ->publishMigrations()
@@ -60,48 +63,49 @@ class TimexServiceProvider extends PluginServiceProvider
             });
     }
 
-    public function boot()
-    {
-        Livewire::component('timex-month',Month::class);
-        Livewire::component('timex-week',Week::class);
-        Livewire::component('timex-day',Day::class);
-        Livewire::component('timex-event',Event::class);
-        Livewire::component('timex-event-widget',EventWidget::class);
-        Livewire::component('timex-day-widget',DayWidget::class);
-        Livewire::component('timex-event-list',EventList::class);
-        Livewire::component('timex-header',Header::class);
+    public function boot() {
+        Livewire::component('timex-month', Month::class);
+        Livewire::component('timex-week', Week::class);
+        Livewire::component('timex-day', Day::class);
+        Livewire::component('timex-event', Event::class);
+        Livewire::component('timex-event-widget', EventWidget::class);
+        Livewire::component('timex-day-widget', DayWidget::class);
+        Livewire::component('timex-event-list', EventList::class);
+        Livewire::component('timex-header', Header::class);
 
         $this->registerConfig();
 
         $this->callAfterResolving(Factory::class, function (Factory $factory, Container $container) {
             $config = $container->make('config')->get('timex', []);
 
-            $factory->add('timex', array_merge(['path' => __DIR__.'/../resources/svg'], $config));
+            $factory->add('timex', array_merge(['path' => __DIR__ . '/../resources/svg'], $config));
         });
 
-        if (config('timex.mini.isMiniCalendarEnabled')){
+        if (config('timex.mini.isMiniCalendarEnabled')) {
             Filament::registerRenderHook(
                 'global-search.start',
-                fn(): View => \view('timex::layout.heading')
+                fn (): View => \view('timex::layout.heading')
             );
         }
+
+        /* FilamentAsset::register([
+            Css::make('timex', __DIR__ . '/../resources/dist/timex.css'),
+            Js::make('timex', __DIR__ . '/../resources/dist/timex.js')->loadedOnRequest(),
+        ]); */
 
         parent::boot();
     }
 
-    private function registerConfig(): void
-    {
-        $this->mergeConfigFrom(__DIR__.'/../config/timex.php', 'timex');
+    private function registerConfig(): void {
+        $this->mergeConfigFrom(__DIR__ . '/../config/timex.php', 'timex');
     }
 
-    protected function getPages(): array
-    {
+    protected function getPages(): array {
         return [
             config('timex.pages.timex')
         ];
     }
-    protected function getResources(): array
-    {
+    protected function getResources(): array {
         return [
             config('timex.resources.event')
         ];
