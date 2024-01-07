@@ -347,7 +347,8 @@ class EventResource extends Resource
                     ->label(trans('timex::timex.event.end'))
                     ->date()
                     ->description(fn($record)=> $record->endTime),
-                BadgeColumn::make('category')
+                TextColumn::make('category')
+                    ->badge()
                     ->label(trans('timex::timex.event.category'))
                     ->enum(config('timex.categories.labels'))
                     ->formatStateUsing(function ($record){
