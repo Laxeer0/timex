@@ -10,6 +10,8 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Buildix\Timex\Resources\EventResource;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class ListEvents extends ListRecords
 {
@@ -25,10 +27,10 @@ class ListEvents extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        if (in_array('participants',\Schema::getColumnListing(self::getEventTableName()))){
+        if (in_array('participants',Schema::getColumnListing(self::getEventTableName()))){
             return parent::getTableQuery()
-                ->where('organizer','=',\Auth::id())
-                ->orWhereJsonContains('participants', \Auth::id());
+                ->where('organizer','=',Auth::id())
+                ->orWhereJsonContains('participants', Auth::id());
         }else{
             return parent::getTableQuery();
         }

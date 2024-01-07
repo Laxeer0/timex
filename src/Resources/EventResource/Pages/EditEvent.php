@@ -14,7 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\Actions\DeleteAction;
-use Filament\Resources\Form;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 use Buildix\Timex\Resources\EventResource;
 
