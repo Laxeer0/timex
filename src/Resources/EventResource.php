@@ -4,7 +4,7 @@ namespace Buildix\Timex\Resources;
 
 use Buildix\Timex\Traits\TimexTrait;
 use Carbon\Carbon;
-use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -13,15 +13,14 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
-use Filament\Resources\Form;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use Filament\Tables\Table;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\BadgeColumn;
@@ -30,13 +29,17 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Buildix\Timex\Resources\EventResource\Pages;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+
 use function PHPUnit\Framework\isEmpty;
 
 class EventResource extends Resource
 {
     use TimexTrait;
-    protected static ?string $recordTitleAttribute = 'subject';
-    protected $chosenStartTime;
+    public static ?string $recordTitleAttribute = 'subject';
+    public $chosenStartTime;
 
     public static function getModel(): string
     {
@@ -58,22 +61,22 @@ class EventResource extends Resource
         return config('timex.resources.slug');
     }
 
-    protected static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): ?string
     {
         return config('timex.pages.group');
     }
 
-    protected static function getNavigationSort(): ?int
+    public static function getNavigationSort(): ?int
     {
         return config('timex.resources.sort',1);
     }
 
-    protected static function getNavigationIcon(): string
+    public static function getNavigationIcon(): string
     {
         return config('timex.resources.icon');
     }
 
-    protected static function shouldRegisterNavigation(): bool
+    public static function shouldRegisterNavigation(): bool
     {
         if (!config('timex.resources.shouldRegisterNavigation')){
             return false;
@@ -103,7 +106,7 @@ class EventResource extends Resource
                         return self::getUserModel()::all()
                             ->pluck(self::getUserModelColumn('name'),self::getUserModelColumn('id'));
                     })
-                    ->multiple()->columnSpanFull()->hidden(!in_array('participants',\Schema::getColumnListing(self::getEventTableName()))),
+                    ->multiple()->columnSpanFull()->hidden(!in_array('participants',Schema::getColumnListing(self::getEventTableName()))),
                 Select::make('category')
                     ->label(trans('timex::timex.event.category'))
                     ->columnSpanFull()
@@ -202,7 +205,7 @@ class EventResource extends Resource
                         ->enableOpen()
                 ])
                 ->heading(trans('timex::timex.event.attachments'))
-                ->hidden(!in_array('attachments',\Schema::getColumnListing(self::getEventTableName())))
+                ->hidden(!in_array('attachments',Schema::getColumnListing(self::getEventTableName())))
                 ->columnSpanFull()
                 ->collapsible()
                 ->collapsed(function ($get){
@@ -216,14 +219,14 @@ class EventResource extends Resource
     {
         return [
             Grid::make(3)->schema([
-                Card::make([
+                Section::make([
                     TextInput::make('subject')
                         ->label(trans('timex::timex.event.subject'))
                         ->required(),
                     RichEditor::make('body')
                         ->label(trans('timex::timex.event.body')),
                 ])->columnSpan(2),
-                Card::make([
+                Section::make([
                     Grid::make(3)->schema([
                         Toggle::make('isAllDay')
                             ->label(trans('timex::timex.event.allDay'))
@@ -285,7 +288,7 @@ class EventResource extends Resource
                                 return self::getUserModel()::all()
                                     ->pluck(self::getUserModelColumn('name'),self::getUserModelColumn('id'));
                             })
-                            ->multiple()->columnSpanFull()->hidden(!in_array('participants',\Schema::getColumnListing(self::getEventTableName()))),
+                            ->multiple()->columnSpanFull()->hidden(!in_array('participants',Schema::getColumnListing(self::getEventTableName()))),
                         Select::make('category')
                             ->label(trans('timex::timex.event.category'))
                             ->columnSpanFull()
@@ -315,7 +318,7 @@ class EventResource extends Resource
                                 ->enableOpen()
                     ])
                     ->heading(trans('timex::timex.event.attachments'))
-                    ->hidden(!in_array('attachments',\Schema::getColumnListing(self::getEventTableName())))
+                    ->hidden(!in_array('attachments',Schema::getColumnListing(self::getEventTableName())))
                     ->collapsible()
                     ->compact()
                     ->collapsed(function ($get){
@@ -348,14 +351,14 @@ class EventResource extends Resource
                     ->label(trans('timex::timex.event.category'))
                     ->enum(config('timex.categories.labels'))
                     ->formatStateUsing(function ($record){
-                        if (\Str::isUuid($record->category)){
+                        if (Str::isUuid($record->category)){
                             return self::getCategoryModel() == null ? "" : self::getCategoryModel()::findOrFail($record->category)->getAttributes()[self::getCategoryModelColumn('value')];
                         }else{
                             return config('timex.categories.labels')[$record->category] ?? "";
                         }
                     })
                     ->color(function ($record){
-                        if (\Str::isUuid($record->category)){
+                        if (Str::isUuid($record->category)){
                             return self::getCategoryModel() == null ? "primary" :self::getCategoryModel()::findOrFail($record->category)->getAttributes()[self::getCategoryModelColumn('color')];
                         }else{
                             return config('timex.categories.colors')[$record->category] ?? "primary";
@@ -365,7 +368,7 @@ class EventResource extends Resource
             ->bulkActions([
                 DeleteBulkAction::make()->action(function (Collection $records){
                     return $records->each(function ($record){
-                        return $record->organizer == \Auth::id() ? $record->delete() : '';
+                        return $record->organizer == Auth::id() ? $record->delete() : '';
                     });
                 })
             ]);
@@ -387,17 +390,17 @@ class EventResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return $record->organizer == \Auth::id();
+        return $record->organizer == Auth::id();
     }
 
     public static function canDelete(Model $record): bool
     {
-        return $record->organizer == \Auth::id();
+        return $record->organizer == Auth::id();
     }
 
     public static function canForceDelete(Model $record): bool
     {
-        return $record->organizer == \Auth::id();
+        return $record->organizer == Auth::id();
     }
 
 }
