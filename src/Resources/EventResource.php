@@ -6,25 +6,18 @@ use Buildix\Timex\Traits\TimexTrait;
 use Carbon\Carbon;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Buildix\Timex\Resources\EventResource\Pages;
@@ -32,8 +25,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-
-use function PHPUnit\Framework\isEmpty;
 
 class EventResource extends Resource
 {
@@ -155,8 +146,8 @@ class EventResource extends Resource
                         ->firstDayOfWeek(config('timex.week.start')),
                     TimePicker::make('startTime')
                         ->hidden(config('timex.resources.isStartEndHidden',false))
-                        ->withoutSeconds()
-                        ->disableLabel()
+                        ->seconds()
+                        ->hiddenLabel()
                         ->required()
                         ->default(now()->setMinutes(0)->addHour())
                         ->reactive()
@@ -184,8 +175,8 @@ class EventResource extends Resource
                         ->firstDayOfWeek(config('timex.week.start')),
                     TimePicker::make('endTime')
                         ->hidden(config('timex.resources.isStartEndHidden',false))
-                        ->withoutSeconds()
-                        ->disableLabel()
+                        ->seconds()
+                        ->hiddenLabel()
                         ->reactive()
                         ->extraAttributes([
                             'class' => '-ml-2'

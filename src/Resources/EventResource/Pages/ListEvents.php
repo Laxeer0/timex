@@ -2,13 +2,10 @@
 
 namespace Buildix\Timex\Resources\EventResource\Pages;
 
-use Buildix\Timex\Events\InteractWithEvents;
 use Buildix\Timex\Traits\TimexTrait;
-use Closure;
-use Filament\Pages\Actions\CreateAction;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Buildix\Timex\Resources\EventResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
